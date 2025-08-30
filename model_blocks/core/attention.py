@@ -32,4 +32,6 @@ class MHAttention(nnx.Module):
             decode=False,
         )
 
-        return attention_output
+        x = inputs + attention_output
+
+        return x

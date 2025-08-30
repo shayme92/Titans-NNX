@@ -18,15 +18,15 @@ class ModelConfig:
     n_persist: int
     n_mem_tokens: int
     mem_hidden: int
-    chunk_size: int = 256
+    chunk_size: int
+    weight_decay_memory: float
+    momentum_memory: float
 
 
 @dataclass
 class OptimizerConfig:
     lr_model: float
     lr_memory: float
-    weight_decay_memory: float
-    momentum_memory: float
     opt_learning_rate: float
     opt_weight_decay: float
 

@@ -7,11 +7,10 @@ model:
     n_persist: 128
     n_mem_tokens: 128
     mem_hidden: 4
-optimizer:
-    lr_model: 3.0e-4
-    lr_memory: 1.0e-3
+    chunk_size: 256
     weight_decay_memory: 0.01
     momentum_memory: 0.9
+optimizer:
     opt_learning_rate: 0.0004
     opt_weight_decay: 0.1
 training:
