@@ -12,7 +12,7 @@ This repository contains a nonofficial open-source implementation of the paper "
 To get started, clone the repository and install the required dependencies:
 
 ```bash
-git clone https://github.com/your-username/Titans-NNX.git
+git clone https://github.com/shayme92/Titans-NNX.git
 cd Titans-NNX
 pip install -r requirements.txt
 ```
