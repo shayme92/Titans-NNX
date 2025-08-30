@@ -25,8 +25,6 @@ class ModelConfig:
 
 @dataclass
 class OptimizerConfig:
-    lr_model: float
-    lr_memory: float
     opt_learning_rate: float
     opt_weight_decay: float
 
