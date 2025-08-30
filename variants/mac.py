@@ -141,6 +141,5 @@ class TitanMAC(nnx.Module):
             ):
                 break
             generated.append(next_token)
-            # decode and print next_token
             print(tokenizer.decode([next_token]), flush=True, end="")
         return tokenizer.decode(start_tokens + generated)

@@ -23,7 +23,15 @@ def train_step(
     (loss, logits), grads = grad_fn(model, batch)
     jax.debug.print("Training loss: {loss}", loss=loss)
     metrics.update(loss=loss, logits=logits, labels=batch[1])
-    optimizer.update(grads)
+    optimizer.update(model, grads)
+
+
+@nnx.jit
+def eval_step(
+    model: nnx.Module, metrics: nnx.MultiMetric, eval_batch
+):
+    loss, logits = cross_entropy(model, eval_batch)
+    metrics.update(val_loss=loss, logits=logits)
 
 
 def get_optimizer(model: nnx.Module, cfg: MacConfig) -> nnx.Optimizer:
@@ -78,17 +86,32 @@ def get_args():
 
 
 def get_batch(
-    data: np.ndarray, seq_len: int, batch_size: int
+    data: np.ndarray, seq_len: int, batch_size: int, mesh
 ) -> tuple[np.ndarray, np.ndarray]:
     ix = np.random.randint(0, len(data) - seq_len, (batch_size,))
     x = np.stack([(data[i : i + seq_len]).astype(jnp.int64) for i in ix])
     y = np.stack([(data[i + 1 : i + 1 + seq_len]).astype(jnp.int64) for i in ix])
-    return x, y
+
+    batch = (x, y)
+
+    if mesh:
+        if len(x) % len(jax.devices()) != 0 and len(jax.devices()) > 1:
+            raise Exception("batch size should be divisible by the number of devices")
+
+        batch = jax.device_put(
+            batch, NamedSharding(mesh, PartitionSpec("batch", None))
+        )
+
+    return batch
 
 
 def main():
     args = get_args()
     py_main(args.config_path, args.train_data_path, args.val_data_path)
+
+
+def _is_should_eval_step(step):
+    return step % 200
 
 
 def py_main(config_path: str, train_data_path: str, val_data_path: str):
@@ -115,17 +138,11 @@ def py_main(config_path: str, train_data_path: str, val_data_path: str):
     step = 0
     start_time = time.time()
     while True:
-        input_batch, target_batch = get_batch(train_data, seq_len, batch_size)
-        batch = (input_batch, target_batch)
-        if len(input_batch) % len(jax.devices()) != 0:
-            continue
-        if mesh:
-            batch = jax.device_put(
-                batch, NamedSharding(mesh, PartitionSpec("batch", None))
-            )
+
+        batch = get_batch(train_data, seq_len, batch_size, mesh)
         train_step(model, optimizer, train_metrics, batch)
 
-        if step % 200 == 0:
+        if _is_should_eval_step(step):
             train_loss = float(train_metrics.compute())
             metrics_history["train_loss"].append(train_loss)
 
@@ -134,19 +151,13 @@ def py_main(config_path: str, train_data_path: str, val_data_path: str):
                 f"Step {step + 1}, Training loss: {train_loss}, Elapsed Time: {elapsed_time:.2f} seconds"
             )
 
-            input_val_batch, target_val_batch = get_batch(val_data, seq_len, batch_size)
-            eval_batch = (input_val_batch, target_val_batch)
+            eval_batch = get_batch(val_data, seq_len, batch_size, mesh)
 
-            if mesh:
-                eval_batch = jax.device_put(
-                    eval_batch, NamedSharding(mesh, PartitionSpec("batch", None))
-                )
-
-            loss, logits = cross_entropy(model, eval_batch)
-            val_metrics.update(val_loss=loss, logits=logits)
+            eval_step(model, val_metrics, eval_batch)
             val_loss = float(val_metrics.compute())
             metrics_history["val_loss"].append(val_loss)
             print(f"Step {step + 1}, Validation loss: {val_loss}")
+
             train_metrics.reset()
             val_metrics.reset()
 
