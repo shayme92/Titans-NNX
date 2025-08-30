@@ -33,7 +33,7 @@ def get_optimizer(model: nnx.Module, cfg: MacConfig) -> nnx.Optimizer:
     optax_chain = optax.chain(
         optax.adamw(learning_rate=schedule, weight_decay=cfg.optimizer.opt_weight_decay)
     )
-    return nnx.Optimizer(model, optax_chain)
+    return nnx.Optimizer(model, optax_chain, wrt=nnx.Param)
 
 
 def create_model(cfg: MacConfig, n_vocab: int, rngs: nnx.Rngs) -> nnx.Module:
