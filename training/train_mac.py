@@ -8,7 +8,7 @@ import tiktoken
 from variants.mac import TitanMAC
 from jax.sharding import NamedSharding, PartitionSpec
 from data_handler.loader import load_dataset
-from losses import cross_entropy
+from training.losses import cross_entropy
 import optax
 import time
 from configs.mac_config import MacConfig
