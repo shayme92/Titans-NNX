@@ -1,0 +1,19 @@
+general:
+    seed: 0
+model:
+    d_model: 1024
+    n_heads: 4
+    seq_len: 4096
+    n_persist: 128
+    n_mem_tokens: 128
+    mem_hidden: 4
+optimizer:
+    lr_model: 3.0e-4
+    lr_memory: 1.0e-3
+    weight_decay_memory: 0.01
+    momentum_memory: 0.9
+    opt_learning_rate: 0.0004
+    opt_weight_decay: 0.1
+training:
+    batch_size: 4
+    max_steps: 10

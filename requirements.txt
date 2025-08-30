@@ -1,0 +1,7 @@
+jax==0.7.1
+flax==0.11.1
+optax==0.2.5
+PyYAML==6.0.2
+numpy==2.3.2
+tiktoken==0.11.0
+dacite==1.9.2
