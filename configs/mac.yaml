@@ -15,5 +15,5 @@ optimizer:
     opt_learning_rate: 0.0004
     opt_weight_decay: 0.1
 training:
-    batch_size: 4
-    max_steps: 10
+    batch_size: 8
+    max_steps: 600000
