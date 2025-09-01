@@ -75,11 +75,11 @@ class TitanMAC(nnx.Module):
             chunk_x_with_mem = jnp.concatenate([p, ht, chunk_x], axis=0)
 
             num_p = self.pmem.n_tokens
-            tilde_mask = jnp.concatenate(
+            padding_mask = jnp.concatenate(
                 [jnp.ones(num_p + self.chunk_size, dtype=bool), chunk_mask], axis=0
             )
 
-            yt = self.attention_block(chunk_x_with_mem)
+            yt = self.attention_block(chunk_x_with_mem, padding_mask)
 
             new_mem_params, new_surprise = self.ltm.update_memory(
                 yt, prev_long_term_memory, prev_surprise

@@ -23,12 +23,19 @@ class MHAttention(nnx.Module):
             num_heads=num_heads, in_features=embed_dim, rngs=rngs
         )
 
-    def __call__(self, inputs: jnp.ndarray) -> jnp.ndarray:
+    def __call__(self, inputs: jnp.ndarray, mask: jnp.ndarray | None = None) -> jnp.ndarray:
         seq_len = inputs.shape[0]
+
+        causal_mask = causal_attention_mask(seq_len)
+
+        if mask is not None:
+            mask = causal_mask & mask
+        else:
+            mask = causal_mask
 
         attention_output = self.mha(
             inputs_q=self.layer_norm1(inputs),
-            mask=causal_attention_mask(seq_len),
+            mask=mask,
             decode=False,
         )
 

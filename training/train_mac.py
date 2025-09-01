@@ -111,7 +111,7 @@ def main():
 
 
 def _is_should_eval_step(step):
-    return step % 200
+    return step % 200 == 0
 
 
 def py_main(config_path: str, train_data_path: str, val_data_path: str):
